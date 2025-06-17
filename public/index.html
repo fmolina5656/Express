@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Azure DevOps Work Items Exporter</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🚀 Azure DevOps Work Items Exporter</h1>
+            <p>Exporta work items a CSV con información de padres</p>
+        </header>
+
+        <div id="status" class="status"></div>
+
+        <section class="card">
+            <h2>📊 Exportar Work Items</h2>
+            <form id="exportForm">
+                <div class="form-group">
+                    <label for="workItemType">Tipo de Work Item:</label>
+                    <select id="workItemType" required>
+                        <option value="">Selecciona un tipo...</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="fileName">Nombre del archivo (opcional):</label>
+                    <input type="text" id="fileName" placeholder="workitems.csv">
+                </div>
+                
+                <button type="submit" class="btn btn-primary">📥 Exportar a CSV</button>
+            </form>
+        </section>
+
+        <section class="card">
+            <h2>🔍 Ver Work Items</h2>
+            <form id="viewForm">
+                <div class="form-group">
+                    <label for="viewWorkItemType">Tipo de Work Item:</label>
+                    <select id="viewWorkItemType" required>
+                        <option value="">Selecciona un tipo...</option>
+                    </select>
+                </div>
+                
+                <button type="submit" class="btn btn-secondary">👁️ Ver Work Items</button>
+            </form>
+            
+            <div id="workItemsResult" class="result"></div>
+        </section>
+
+        <section class="card">
+            <h2>🔧 Campos Disponibles</h2>
+            <form id="fieldsForm">
+                <div class="form-group">
+                    <label for="fieldsWorkItemType">Tipo de Work Item:</label>
+                    <select id="fieldsWorkItemType" required>
+                        <option value="">Selecciona un tipo...</option>
+                    </select>
+                </div>
+                
+                <button type="submit" class="btn btn-secondary">📋 Ver Campos</button>
+            </form>
+            
+            <div id="fieldsResult" class="result"></div>
+        </section>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
