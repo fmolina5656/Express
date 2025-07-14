@@ -234,17 +234,18 @@ class PowerPointService {
                 fontSize: 14, color: this.colors.text
             });
 
-            // Descripción
+            // Descripción (limpiando HTML)
             const description = this.azureService.getFieldValue(epic, 'System.Description') || 'No description available';
-            slide.addText(`Description: ${this.truncateText(description, 200)}`, {
-                x: 1, y: 4.1, w: 8, h: 1.5,
+            const cleanDescription = this.cleanHtmlText(description);
+            slide.addText(`Description: ${this.truncateText(cleanDescription, 200)}`, {
+                x: 1, y: 4.1, w: 8, h: 1.2,
                 fontSize: 12, color: this.colors.text
             });
 
             // Iteration Path
             const iterationPath = this.azureService.getFieldValue(epic, 'System.IterationPath') || 'N/A';
             slide.addText(`Iteration: ${iterationPath}`, {
-                x: 1, y: 5.8, w: 8, h: 0.6,
+                x: 1, y: 5.5, w: 8, h: 0.6,
                 fontSize: 12, color: this.colors.secondary
             });
 
@@ -303,8 +304,8 @@ class PowerPointService {
             ]);
 
             slide.addTable(tableData, {
-                x: 1, y: 4.5, w: 8, h: 2,
-                fontSize: 12,
+                x: 1, y: 4.2, w: 8, h: 1.8,
+                fontSize: 11,
                 color: this.colors.text,
                 fill: { color: this.colors.lightGray },
                 border: { type: 'solid', color: this.colors.primary }
@@ -353,8 +354,8 @@ class PowerPointService {
             const realEffort = parseFloat(effortRealTotal) || 0;
             const variance = totalEffort > 0 ? ((realEffort - totalEffort) / totalEffort * 100).toFixed(1) : '0';
             
-            this.createMetricCard(slide, 'Effort Variance', `${variance}%`, variance > 0 ? 'over' : 'under', 2, 5.5, variance > 0 ? this.colors.danger : this.colors.success);
-            this.createMetricCard(slide, 'Completion Rate', completedTotal && effortTotal ? `${((parseFloat(completedTotal) / parseFloat(effortTotal)) * 100).toFixed(1)}%` : '0%', '', 6, 5.5, this.colors.success);
+            this.createMetricCard(slide, 'Effort Variance', `${variance}%`, variance > 0 ? 'over' : 'under', 2, 5.2, variance > 0 ? this.colors.danger : this.colors.success);
+            this.createMetricCard(slide, 'Completion Rate', completedTotal && effortTotal ? `${((parseFloat(completedTotal) / parseFloat(effortTotal)) * 100).toFixed(1)}%` : '0%', '', 6, 5.2, this.colors.success);
 
         } catch (error) {
             console.error('Error in createBudgetSlide:', error);
@@ -375,9 +376,13 @@ class PowerPointService {
             const createdBy = this.azureService.getFieldValue(epic, 'System.CreatedBy');
             const changedBy = this.azureService.getFieldValue(epic, 'System.ChangedBy');
 
+            // Limpiar HTML en la descripción
+            const rawDescription = this.azureService.getFieldValue(epic, 'System.Description', 'No description available');
+            const cleanDescription = this.cleanHtmlText(rawDescription);
+            
             const epicInfo = [
                 `Epic Title: ${this.azureService.getFieldValue(epic, 'System.Title', 'N/A')}`,
-                `Description: ${this.truncateText(this.azureService.getFieldValue(epic, 'System.Description', 'No description available'), 100)}`,
+                `Description: ${this.truncateText(cleanDescription, 100)}`,
                 `Created By: ${createdBy?.displayName || createdBy?.uniqueName || createdBy || 'Unknown'}`,
                 `Changed By: ${changedBy?.displayName || changedBy?.uniqueName || changedBy || 'Unknown'}`,
                 `Iteration Path: ${this.azureService.getFieldValue(epic, 'System.IterationPath', 'N/A')}`,
@@ -386,8 +391,8 @@ class PowerPointService {
 
             epicInfo.forEach((text, index) => {
                 slide.addText(text, {
-                    x: 1, y: 2 + (index * 0.6), w: 8, h: 0.5,
-                    fontSize: 14, color: this.colors.text
+                    x: 1, y: 2 + (index * 0.5), w: 8, h: 0.4,
+                    fontSize: 12, color: this.colors.text
                 });
             });
 
@@ -480,11 +485,14 @@ class PowerPointService {
         try {
             this.addSlideHeader(slide, 'Integration & Business Details', 'Odoo integration and business requirements');
 
-            // Panel de Odoo Integration
+            // Panel de Odoo Integration (limpiando HTML en comentarios)
+            const rawComments = this.azureService.getFieldValue(epic, 'Custom.Calendarcomments', 'None');
+            const cleanComments = this.cleanHtmlText(rawComments);
+            
             this.createDataPanel(slide, 'Odoo Integration', [
                 { label: 'Odoo ID', value: this.azureService.getFieldValue(epic, 'Custom.IDOdoo', 'N/A'), highlight: true },
                 { label: 'Odoo Link', value: this.truncateText(this.azureService.getFieldValue(epic, 'Custom.LinkOdoo', 'N/A'), 25) },
-                { label: 'Calendar Comments', value: this.truncateText(this.azureService.getFieldValue(epic, 'Custom.Calendarcomments', 'None'), 25) }
+                { label: 'Calendar Comments', value: this.truncateText(cleanComments, 25) }
             ], 0.5, 1.8, 4.5, this.colors.info);
 
             // Panel de Business Value
@@ -494,11 +502,16 @@ class PowerPointService {
                 { label: 'Backlog Priority', value: this.azureService.getFieldValue(epic, 'Microsoft.VSTS.Common.BacklogPriority', 'N/A'), highlight: true }
             ], 5.2, 1.8, 4.3, this.colors.accent);
 
-            // Panel de Acceptance Criteria y Milestones
+            // Panel de Acceptance Criteria y Milestones (limpiando HTML)
+            const rawCriteria = this.azureService.getFieldValue(epic, 'Microsoft.VSTS.Common.AcceptanceCriteria', 'None');
+            const cleanCriteria = this.cleanHtmlText(rawCriteria);
+            const rawMilestones = this.azureService.getFieldValue(epic, 'Custom.Hitos', 'None');
+            const cleanMilestones = this.cleanHtmlText(rawMilestones);
+            
             this.createDataPanel(slide, 'Requirements & Milestones', [
-                { label: 'Milestones', value: this.truncateText(this.azureService.getFieldValue(epic, 'Custom.Hitos', 'None'), 40) },
-                { label: 'Acceptance Criteria', value: this.truncateText(this.azureService.getFieldValue(epic, 'Microsoft.VSTS.Common.AcceptanceCriteria', 'None'), 60) }
-            ], 2.8, 4.5, 4.4, this.colors.secondary);
+                { label: 'Milestones', value: this.truncateText(cleanMilestones, 40) },
+                { label: 'Acceptance Criteria', value: this.truncateText(cleanCriteria, 60) }
+            ], 2.8, 4.2, 4.4, this.colors.secondary);
 
         } catch (error) {
             console.error('Error in createOdooIntegrationSlide:', error);
@@ -541,7 +554,7 @@ class PowerPointService {
             });
 
             slide.addTable(tableData, {
-                x: 0.5, y: 1.8, w: 9, h: 4,
+                x: 0.5, y: 1.8, w: 9, h: 3.8,
                 fontSize: 10,
                 color: this.colors.text,
                 fill: { color: this.colors.lightGray },
@@ -589,7 +602,7 @@ class PowerPointService {
             });
 
             slide.addTable(tableData, {
-                x: 0.5, y: 1.8, w: 9, h: 4,
+                x: 0.5, y: 1.8, w: 9, h: 3.8,
                 fontSize: 10,
                 color: this.colors.text,
                 fill: { color: this.colors.lightGray },
@@ -682,6 +695,33 @@ class PowerPointService {
     truncateText(text, maxLength) {
         if (!text) return '';
         return text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
+    }
+
+    // Nueva función para limpiar HTML
+    cleanHtmlText(htmlText) {
+        if (!htmlText) return '';
+        
+        // Convertir HTML a texto plano
+        let cleanText = htmlText
+            // Reemplazar saltos de línea HTML con espacios
+            .replace(/<br\s*\/?>/gi, ' ')
+            .replace(/<\/p>/gi, ' ')
+            .replace(/<\/div>/gi, ' ')
+            .replace(/<\/h[1-6]>/gi, '. ')
+            // Remover todas las etiquetas HTML
+            .replace(/<[^>]*>/g, '')
+            // Decodificar entidades HTML comunes
+            .replace(/&nbsp;/g, ' ')
+            .replace(/&amp;/g, '&')
+            .replace(/&lt;/g, '<')
+            .replace(/&gt;/g, '>')
+            .replace(/&quot;/g, '"')
+            .replace(/&#39;/g, "'")
+            // Limpiar espacios múltiples
+            .replace(/\s+/g, ' ')
+            .trim();
+            
+        return cleanText;
     }
 
     // Funciones auxiliares para diseño corporativo
