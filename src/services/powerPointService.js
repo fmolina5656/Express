@@ -268,21 +268,21 @@ class PowerPointService {
             // Estadísticas generales
             const stats = this.calculateProgressStats(userStories, tasks);
             
-            // Métricas principales
+            // Métricas principales (más compactas)
             slide.addText(`User Stories: ${stats.userStories.total}`, {
-                x: 1, y: 2, w: 4, h: 0.6,
-                fontSize: 16, bold: true, color: this.colors.text
+                x: 1, y: 1.8, w: 4, h: 0.5,
+                fontSize: 14, bold: true, color: this.colors.text
             });
 
             slide.addText(`Tasks: ${stats.tasks.total}`, {
-                x: 5, y: 2, w: 4, h: 0.6,
-                fontSize: 16, bold: true, color: this.colors.text
+                x: 5, y: 1.8, w: 4, h: 0.5,
+                fontSize: 14, bold: true, color: this.colors.text
             });
 
-            // Progress bars visuales
+            // Progress bars visuales (ajustado)
             this.createProgressChart(slide, stats, pptx);
 
-            // Tabla de resumen de estados
+            // Tabla de resumen de estados (posición ajustada)
             const tableData = [
                 ['Type', 'New', 'Active/In Progress', 'Done', 'Total']
             ];
@@ -304,8 +304,8 @@ class PowerPointService {
             ]);
 
             slide.addTable(tableData, {
-                x: 1, y: 4.2, w: 8, h: 1.8,
-                fontSize: 11,
+                x: 1, y: 3.8, w: 8, h: 1.5,
+                fontSize: 10,
                 color: this.colors.text,
                 fill: { color: this.colors.lightGray },
                 border: { type: 'solid', color: this.colors.primary }
@@ -333,7 +333,7 @@ class PowerPointService {
             const effortRealTotal = this.azureService.getFieldValue(epic, 'Custom.EffortRealTotal', '0');
             const rework = this.azureService.getFieldValue(epic, 'Custom.Rework', '0');
 
-            // Panel de Effort Tracking
+            // Panel de Effort Tracking (más compacto)
             this.createDataPanel(slide, 'Effort Tracking', [
                 { label: 'Effort Total', value: `${effortTotal} hours` },
                 { label: 'Real Effort Total', value: `${effortRealTotal} hours`, highlight: true },
@@ -342,20 +342,20 @@ class PowerPointService {
                 { label: 'Rework', value: `${rework} hours` }
             ], 0.5, 1.8, 4.5, this.colors.primary);
 
-            // Panel de Change Requests
+            // Panel de Change Requests (más compacto)
             this.createDataPanel(slide, 'Change Requests', [
                 { label: 'Total Requests', value: this.azureService.getFieldValue(epic, 'Custom.TotalChangeRequest', '0') },
                 { label: 'Completed', value: this.azureService.getFieldValue(epic, 'Custom.CompletedChangeRequest', '0'), highlight: true },
                 { label: 'Remaining', value: this.azureService.getFieldValue(epic, 'Custom.RemainingChangeRequest', '0') }
             ], 5.2, 1.8, 4.3, this.colors.warning);
 
-            // Métricas visuales en la parte inferior
+            // Métricas visuales en la parte inferior (ajustado)
             const totalEffort = parseFloat(effortTotal) || 0;
             const realEffort = parseFloat(effortRealTotal) || 0;
             const variance = totalEffort > 0 ? ((realEffort - totalEffort) / totalEffort * 100).toFixed(1) : '0';
             
-            this.createMetricCard(slide, 'Effort Variance', `${variance}%`, variance > 0 ? 'over' : 'under', 2, 5.2, variance > 0 ? this.colors.danger : this.colors.success);
-            this.createMetricCard(slide, 'Completion Rate', completedTotal && effortTotal ? `${((parseFloat(completedTotal) / parseFloat(effortTotal)) * 100).toFixed(1)}%` : '0%', '', 6, 5.2, this.colors.success);
+            this.createMetricCard(slide, 'Effort Variance', `${variance}%`, variance > 0 ? 'over' : 'under', 2, 4.8, variance > 0 ? this.colors.danger : this.colors.success);
+            this.createMetricCard(slide, 'Completion Rate', completedTotal && effortTotal ? `${((parseFloat(completedTotal) / parseFloat(effortTotal)) * 100).toFixed(1)}%` : '0%', '', 6, 4.8, this.colors.success);
 
         } catch (error) {
             console.error('Error in createBudgetSlide:', error);
@@ -414,7 +414,7 @@ class PowerPointService {
             // Timeline visual
             this.createTimeline(slide, epic);
 
-            // Panel de fechas importantes
+            // Panel de fechas importantes (ajustado)
             this.createDataPanel(slide, 'Key Dates', [
                 { label: 'Created', value: this.azureService.formatDate(this.azureService.getFieldValue(epic, 'System.CreatedDate')) },
                 { label: 'Request Date', value: this.azureService.formatDate(this.azureService.getFieldValue(epic, 'Custom.RequestDate')) },
@@ -422,13 +422,13 @@ class PowerPointService {
                 { label: 'Kick Off', value: this.azureService.formatDate(this.azureService.getFieldValue(epic, 'Custom.KickOffDate')), highlight: true }
             ], 5.5, 1.8, 4, this.colors.primary);
 
-            // Panel de fechas target
+            // Panel de fechas target (ajustado)
             this.createDataPanel(slide, 'Target Dates', [
                 { label: 'Start Date', value: this.azureService.formatDate(this.azureService.getFieldValue(epic, 'Microsoft.VSTS.Scheduling.StartDate')) },
                 { label: 'Target Date', value: this.azureService.formatDate(this.azureService.getFieldValue(epic, 'Microsoft.VSTS.Scheduling.TargetDate')), highlight: true },
                 { label: 'Original Target', value: this.azureService.formatDate(this.azureService.getFieldValue(epic, 'Custom.OriginalTargetDate')) },
                 { label: 'State Change', value: this.azureService.formatDate(this.azureService.getFieldValue(epic, 'Microsoft.VSTS.Common.StateChangeDate')) }
-            ], 5.5, 4.5, 4, this.colors.accent);
+            ], 5.5, 4.0, 4, this.colors.accent);
 
         } catch (error) {
             console.error('Error in createDatesSlide:', error);
@@ -511,7 +511,7 @@ class PowerPointService {
             this.createDataPanel(slide, 'Requirements & Milestones', [
                 { label: 'Milestones', value: this.truncateText(cleanMilestones, 40) },
                 { label: 'Acceptance Criteria', value: this.truncateText(cleanCriteria, 60) }
-            ], 2.8, 4.2, 4.4, this.colors.secondary);
+            ], 2.8, 3.8, 4.4, this.colors.secondary);
 
         } catch (error) {
             console.error('Error in createOdooIntegrationSlide:', error);
@@ -554,8 +554,8 @@ class PowerPointService {
             });
 
             slide.addTable(tableData, {
-                x: 0.5, y: 1.8, w: 9, h: 3.8,
-                fontSize: 10,
+                x: 0.5, y: 1.8, w: 9, h: 3.2,
+                fontSize: 9,
                 color: this.colors.text,
                 fill: { color: this.colors.lightGray },
                 border: { type: 'solid', color: this.colors.danger }
@@ -602,8 +602,8 @@ class PowerPointService {
             });
 
             slide.addTable(tableData, {
-                x: 0.5, y: 1.8, w: 9, h: 3.8,
-                fontSize: 10,
+                x: 0.5, y: 1.8, w: 9, h: 3.2,
+                fontSize: 9,
                 color: this.colors.text,
                 fill: { color: this.colors.lightGray },
                 border: { type: 'solid', color: this.colors.warning }
@@ -658,15 +658,15 @@ class PowerPointService {
 
     // CORREGIDO: Pasar pptx como parámetro
     createProgressChart(slide, stats, pptx) {
-        // Crear un gráfico de barras simple usando formas
-        const chartY = 3;
-        const barHeight = 0.4;
-        const barSpacing = 0.6;
+        // Crear un gráfico de barras simple usando formas (más compacto)
+        const chartY = 2.5;
+        const barHeight = 0.3;
+        const barSpacing = 0.4;
 
         // User Stories
         slide.addText('User Stories Progress:', {
-            x: 0.5, y: chartY - 0.5, w: 4, h: 0.3,
-            fontSize: 14, bold: true, color: '333333'
+            x: 1, y: chartY - 0.3, w: 4, h: 0.3,
+            fontSize: 12, bold: true, color: this.colors.text
         });
 
         const usTotal = stats.userStories.total || 1;
@@ -678,16 +678,16 @@ class PowerPointService {
 
         usProgress.forEach((item, index) => {
             const percentage = (item.value / usTotal) * 100;
-            const barWidth = (percentage / 100) * 3;
+            const barWidth = (percentage / 100) * 2.5;
             
             slide.addShape('rect', {
-                x: 0.5, y: chartY + (index * barSpacing), w: barWidth, h: barHeight,
-                fill: { color: item.color }
+                x: 1, y: chartY + (index * barSpacing), w: barWidth, h: barHeight,
+                fill: item.color
             });
 
             slide.addText(`${item.label}: ${item.value} (${percentage.toFixed(1)}%)`, {
                 x: 4, y: chartY + (index * barSpacing), w: 2, h: barHeight,
-                fontSize: 10, color: '333333'
+                fontSize: 9, color: this.colors.text
             });
         });
     }
@@ -754,7 +754,7 @@ class PowerPointService {
     }
 
     createDataPanel(slide, title, data, x, y, width, color) {
-        const height = (data.length * 0.4) + 1;
+        const height = (data.length * 0.35) + 0.9; // Más compacto
 
         // Fondo del panel
         slide.addShape('rect', {
@@ -765,30 +765,30 @@ class PowerPointService {
 
         // Header del panel
         slide.addShape('rect', {
-            x: x, y: y, w: width, h: 0.6,
+            x: x, y: y, w: width, h: 0.5, // Más compacto
             fill: color
         });
 
         // Título del panel
         slide.addText(title, {
-            x: x + 0.2, y: y + 0.1, w: width - 0.4, h: 0.4,
-            fontSize: 16, bold: true, color: this.colors.white
+            x: x + 0.2, y: y + 0.05, w: width - 0.4, h: 0.4,
+            fontSize: 14, bold: true, color: this.colors.white // Fuente más pequeña
         });
 
         // Datos
         data.forEach((item, index) => {
-            const itemY = y + 0.8 + (index * 0.4);
+            const itemY = y + 0.6 + (index * 0.35); // Más compacto
             
             // Label
             slide.addText(`${item.label}:`, {
                 x: x + 0.2, y: itemY, w: width * 0.4, h: 0.3,
-                fontSize: 12, bold: true, color: this.colors.text
+                fontSize: 11, bold: true, color: this.colors.text // Fuente más pequeña
             });
 
             // Value
             slide.addText(item.value, {
                 x: x + 0.2 + (width * 0.4), y: itemY, w: width * 0.55, h: 0.3,
-                fontSize: 12, 
+                fontSize: 11, // Fuente más pequeña
                 color: item.highlight ? color : this.colors.text,
                 bold: item.highlight
             });
@@ -796,37 +796,37 @@ class PowerPointService {
     }
 
     createMetricCard(slide, title, value, unit, x, y, color) {
-        // Fondo de la métrica
+        // Fondo de la métrica (más compacto)
         slide.addShape('rect', {
-            x: x, y: y, w: 2.2, h: 1.5,
+            x: x, y: y, w: 2.2, h: 1.2, // Reducido altura
             fill: this.colors.white,
             line: { color: color, width: 2 }
         });
 
         // Icono/indicador de color
         slide.addShape('ellipse', {
-            x: x + 0.2, y: y + 0.2, w: 0.4, h: 0.4,
+            x: x + 0.2, y: y + 0.15, w: 0.3, h: 0.3, // Más pequeño
             fill: color
         });
 
         // Título
         slide.addText(title, {
-            x: x + 0.8, y: y + 0.2, w: 1.2, h: 0.4,
-            fontSize: 11, bold: true, color: this.colors.text
+            x: x + 0.6, y: y + 0.15, w: 1.4, h: 0.3,
+            fontSize: 10, bold: true, color: this.colors.text // Fuente más pequeña
         });
 
         // Valor
         slide.addText(value, {
-            x: x + 0.1, y: y + 0.7, w: 1.5, h: 0.5,
-            fontSize: 24, bold: true, color: color,
+            x: x + 0.1, y: y + 0.5, w: 1.5, h: 0.4,
+            fontSize: 20, bold: true, color: color, // Fuente más pequeña
             align: 'center'
         });
 
         // Unidad
         if (unit) {
             slide.addText(unit, {
-                x: x + 1.6, y: y + 0.9, w: 0.5, h: 0.3,
-                fontSize: 10, color: this.colors.text
+                x: x + 1.6, y: y + 0.7, w: 0.5, h: 0.3,
+                fontSize: 9, color: this.colors.text // Fuente más pequeña
             });
         }
     }
