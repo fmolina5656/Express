@@ -87,6 +87,56 @@ class AzureDevOpsService {
       throw new Error(`Error obteniendo tipos de work items: ${error.response?.data?.message || error.message}`);
     }
   }
+  async getWorkItemById(workItemId) {
+    try {
+        const response = await axios.get(
+            `${this.baseUrl}/wit/workitems/${workItemId}?$expand=relations&api-version=6.0`,
+            { headers: this.headers }
+        );
+        return response.data;
+    } catch (error) {
+        throw new Error(`Error obteniendo work item ${workItemId}: ${error.response?.data?.message || error.message}`);
+    }
+}
+
+async getChildWorkItems(parentId, workItemType) {
+    try {
+        const wiqlQuery = {
+            query: `SELECT [System.Id] 
+                   FROM WorkItemLinks 
+                   WHERE [Source].[System.Id] = ${parentId} 
+                   AND [Target].[System.WorkItemType] = '${workItemType}' 
+                   AND [System.Links.LinkType] = 'System.LinkTypes.Hierarchy-Forward'`
+        };
+
+        const wiqlResponse = await axios.post(
+            `${this.baseUrl}/wit/wiql?api-version=6.0`,
+            wiqlQuery,
+            { headers: this.headers }
+        );
+
+        if (!wiqlResponse.data.workItemRelations || wiqlResponse.data.workItemRelations.length === 0) {
+            return [];
+        }
+
+        const workItemIds = wiqlResponse.data.workItemRelations
+            .filter(rel => rel.target)
+            .map(rel => rel.target.id);
+
+        if (workItemIds.length === 0) {
+            return [];
+        }
+
+        const workItemsResponse = await axios.get(
+            `${this.baseUrl}/wit/workitems?ids=${workItemIds.join(',')}&$expand=relations&api-version=6.0`,
+            { headers: this.headers }
+        );
+
+        return workItemsResponse.data.value;
+    } catch (error) {
+        throw new Error(`Error obteniendo work items hijo: ${error.response?.data?.message || error.message}`);
+    }
+}
 
   getParentId(workItem) {
     if (!workItem.relations) {

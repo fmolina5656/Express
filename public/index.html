@@ -1,72 +1,209 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Azure DevOps Work Items Exporter</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
 </head>
+
 <body>
     <div class="container">
         <header>
-            <h1>🚀 Azure DevOps Work Items Exporter</h1>
-            <p>Exporta work items a CSV con información de padres</p>
+            <h1><span class="icon">🚀</span> Azure DevOps Work Items Exporter</h1>
+            <p>Exporta, analiza y gestiona work items con información detallada</p>
         </header>
 
-        <div id="status" class="status"></div>
+        <div id="status" class="status hidden"></div>
 
-        <section class="card">
-            <h2>📊 Exportar Work Items</h2>
-            <form id="exportForm">
-                <div class="form-group">
-                    <label for="workItemType">Tipo de Work Item:</label>
-                    <select id="workItemType" required>
-                        <option value="">Selecciona un tipo...</option>
-                    </select>
-                </div>
-                
-                <div class="form-group">
-                    <label for="fileName">Nombre del archivo (opcional):</label>
-                    <input type="text" id="fileName" placeholder="workitems.csv">
-                </div>
-                
-                <button type="submit" class="btn btn-primary">📥 Exportar a CSV</button>
-            </form>
+        <!-- Dashboard Stats -->
+        <section class="stats-grid">
+            <div class="card card-stats">
+                <span class="stat-number" id="totalWorkItems">-</span>
+                <span class="stat-label">Total Work Items</span>
+            </div>
+            <div class="card card-stats">
+                <span class="stat-number" id="activeProjects">-</span>
+                <span class="stat-label">Active Projects</span>
+            </div>
+            <div class="card card-stats">
+                <span class="stat-number" id="completedToday">-</span>
+                <span class="stat-label">Completed Today</span>
+            </div>
+            <div class="card card-stats">
+                <span class="stat-number" id="totalExports">-</span>
+                <span class="stat-label">Total Exports</span>
+            </div>
         </section>
 
-        <section class="card">
-            <h2>🔍 Ver Work Items</h2>
-            <form id="viewForm">
-                <div class="form-group">
-                    <label for="viewWorkItemType">Tipo de Work Item:</label>
-                    <select id="viewWorkItemType" required>
-                        <option value="">Selecciona un tipo...</option>
-                    </select>
-                </div>
-                
-                <button type="submit" class="btn btn-secondary">👁️ Ver Work Items</button>
-            </form>
-            
-            <div id="workItemsResult" class="result"></div>
-        </section>
+        <!-- Main Actions Grid -->
+        <div class="dashboard-grid">
+            <section class="card">
+                <h2><span class="icon">📊</span> Exportar Work Items</h2>
+                <form id="exportForm">
+                    <div class="input-group">
+                        <div class="form-group">
+                            <label for="workItemType">Tipo de Work Item:</label>
+                            <select id="workItemType" required>
+                                <option value="">Selecciona un tipo...</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="fileName">Nombre del archivo:</label>
+                            <input type="text" id="fileName" placeholder="workitems.csv">
+                        </div>
+                    </div>
 
+                    <div class="form-group">
+                        <label for="exportFormat">Formato de exportación:</label>
+                        <select id="exportFormat">
+                            <option value="csv">CSV</option>
+                            <option value="excel">Excel</option>
+                            <option value="json">JSON</option>
+                        </select>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">
+                        <span class="icon">📥</span> Exportar Datos
+                    </button>
+                </form>
+            </section>
+
+            <section class="card">
+                <h2><span class="icon">🔍</span> Ver Work Items</h2>
+                <form id="viewForm">
+                    <div class="input-group">
+                        <div class="form-group">
+                            <label for="viewWorkItemType">Tipo de Work Item:</label>
+                            <select id="viewWorkItemType" required>
+                                <option value="">Selecciona un tipo...</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="searchTerm">Búsqueda:</label>
+                            <input type="text" id="searchTerm" placeholder="Buscar por título...">
+                        </div>
+                    </div>
+
+                    <div class="input-group">
+                        <div class="form-group">
+                            <label for="stateFilter">Filtrar por estado:</label>
+                            <select id="stateFilter">
+                                <option value="">Todos los estados</option>
+                                <option value="New">New</option>
+                                <option value="Active">Active</option>
+                                <option value="Done">Done</option>
+                                <option value="Closed">Closed</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="assignedFilter">Asignado a:</label>
+                            <select id="assignedFilter">
+                                <option value="">Todos</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-secondary">
+                        <span class="icon">👁️</span> Ver Work Items
+                    </button>
+                </form>
+
+                <div id="workItemsResult" class="result hidden"></div>
+            </section>
+        </div>
+
+        <!-- Advanced Features Grid -->
+        <div class="dashboard-grid">
+            <section class="card">
+                <h2><span class="icon">📊</span> Generar Presentación Epic</h2>
+                <form id="pptForm">
+                    <div class="input-group">
+                        <div class="form-group">
+                            <label for="epicId">Epic ID:</label>
+                            <input type="number" id="epicId" required placeholder="Ej: 22151">
+                        </div>
+                        <div class="form-group">
+                            <label for="pptFileName">Nombre del archivo:</label>
+                            <input type="text" id="pptFileName" placeholder="Epic_Report.pptx">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="pptTemplate">Plantilla:</label>
+                        <select id="pptTemplate">
+                            <option value="standard">Estándar</option>
+                            <option value="executive">Ejecutiva</option>
+                            <option value="detailed">Detallada</option>
+                        </select>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">
+                        <span class="icon">🎯</span> Generar PowerPoint
+                    </button>
+                </form>
+
+                <div id="pptResult" class="result hidden"></div>
+            </section>
+
+            <section class="card">
+                <h2><span class="icon">🔧</span> Campos Disponibles</h2>
+                <form id="fieldsForm">
+                    <div class="form-group">
+                        <label for="fieldsWorkItemType">Tipo de Work Item:</label>
+                        <select id="fieldsWorkItemType" required>
+                            <option value="">Selecciona un tipo...</option>
+                        </select>
+                    </div>
+
+                    <button type="submit" class="btn btn-secondary">
+                        <span class="icon">📋</span> Ver Campos
+                    </button>
+                </form>
+
+                <div id="fieldsResult" class="result hidden"></div>
+            </section>
+        </div>
+
+        <!-- Analytics Section -->
         <section class="card">
-            <h2>🔧 Campos Disponibles</h2>
-            <form id="fieldsForm">
-                <div class="form-group">
-                    <label for="fieldsWorkItemType">Tipo de Work Item:</label>
-                    <select id="fieldsWorkItemType" required>
-                        <option value="">Selecciona un tipo...</option>
-                    </select>
+            <h2><span class="icon">📈</span> Analytics Dashboard</h2>
+            <div id="analyticsContent">
+                <div class="stats-grid">
+                    <div class="card-stats">
+                        <span class="stat-number" id="avgCompletionTime">-</span>
+                        <span class="stat-label">Avg Completion (days)</span>
+                    </div>
+                    <div class="card-stats">
+                        <span class="stat-number" id="burndownRate">-</span>
+                        <span class="stat-label">Burndown Rate</span>
+                    </div>
+                    <div class="card-stats">
+                        <span class="stat-number" id="teamVelocity">-</span>
+                        <span class="stat-label">Team Velocity</span>
+                    </div>
+                    <div class="card-stats">
+                        <span class="stat-number" id="defectRate">-</span>
+                        <span class="stat-label">Defect Rate %</span>
+                    </div>
                 </div>
                 
-                <button type="submit" class="btn btn-secondary">📋 Ver Campos</button>
-            </form>
-            
-            <div id="fieldsResult" class="result"></div>
+                <div class="progress">
+                    <div class="progress-bar" id="overallProgress" style="width: 0%"></div>
+                </div>
+                <p class="text-center text-muted">Overall Project Progress</p>
+            </div>
         </section>
     </div>
 
+    <!-- Toast notification container -->
+    <div id="toastContainer" style="position: fixed; top: 2rem; right: 2rem; z-index: 1000;"></div>
+
     <script src="script.js"></script>
 </body>
+
 </html>

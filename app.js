@@ -6,6 +6,8 @@ require('dotenv').config();
 
 const azureDevOpsRoutes = require('./src/routes/azureDevOps');
 const errorHandler = require('./src/middleware/errorHandler');
+const powerPointRoutes = require('./src/routes/powerPoint');
+
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -62,6 +64,7 @@ app.get('/health', (req, res) => {
 
 // Rutas de la API
 app.use('/api/azure-devops', azureDevOpsRoutes);
+app.use('/api/powerpoint', powerPointRoutes);
 
 // Middleware de manejo de errores
 app.use(errorHandler);
